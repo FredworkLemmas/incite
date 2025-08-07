@@ -1,6 +1,14 @@
-# BitDaddy Invoke
-
+# Invocate
 Enhanced Invoke task management with simplified namespacing support.
+
+## Purpose
+I love [Invoke](https://www.pyinvoke.org/) and I use it all the time, but I
+find the namespace feature to be a bit cumbersome to maintain so I've written
+Invocate as a wrapper on top of Invoke.
+
+Invocate overrides the task decorator to accept additional namespace-related
+parameters and defines a task_namespace() function that makes namespacing
+task a lot easier to work with.
 
 ## Features
 
@@ -10,13 +18,13 @@ Enhanced Invoke task management with simplified namespacing support.
 ## Installation
 
 ```bash
-pip install incite
+pip install invocate
 ```
 
 ## Quick Start
 
 ```python
-from incite import task, task_namespace
+from invocate import task, task_namespace
 
 
 # Simple task (no namespace)
@@ -27,14 +35,14 @@ def hello(c):
 
 
 # Namespaced task
-@task(menu_parent=('build', 'frontend'))
+@task(namespace=('build', 'frontend'))
 def build_js(c):
     """Build JavaScript assets"""
     c.run("npm run build")
 
 
 # Another namespaced task
-@task(menu_parent='build.backend')
+@task(namespace='build.backend')
 def build_python(c):
     """Build Python package"""
     c.run("python -m build")
@@ -64,7 +72,7 @@ Available tasks:
 ## Advanced Usage
 ### Customer Task Names
 ```python
-@task(name='custom-name', menu_parent=('utils',))
+@task(name='custom-name', namespace=('utils',))
 def some_function(c):
     pass
 ```
@@ -73,7 +81,7 @@ def some_function(c):
 ### `task(*args, **kwargs)`
 Enhanced task decorator with namespace support.
 **Parameters:**
-- (tuple): Namespace hierarchy as tuple of strings `menu_parent`
+- (tuple): Namespace hierarchy as tuple of strings `namespace`
 - Standard invoke task parameters (name, help, etc.)
 
 ### `task_namespace()`

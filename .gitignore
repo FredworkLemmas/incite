@@ -1,1 +1,5 @@
 .idea
+.env
+dist/
+src/invocate.egg-info/
+__pycache__/

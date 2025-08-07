@@ -1,0 +1,6 @@
+pytest
+invoke
+twine
+build
+python-dotenv
+attrs

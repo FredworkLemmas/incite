@@ -1,4 +1,4 @@
-from incite import task, task_namespace
+from invocate import task, task_namespace
 
 
 # Simple task
@@ -9,23 +9,22 @@ def hello(c):
 
 
 # Namespaced tasks
-@task(menu_parent=('build',))
+@task(namespace=('build',))
 def clean(c):
     """Clean build artifacts."""
     c.run("rm -rf build/ dist/ *.egg-info/")
 
 
-@task(menu_parent=('build', 'python'))
+@task(namespace=('build', 'python'))
 def build_wheel(c):
     """Build Python wheel."""
     c.run("python -m build --wheel")
 
 
-@task(menu_parent=('build', 'python'))
+@task(namespace=('build', 'python'))
 def build_sdist(c):
     """Build source distribution."""
     c.run("python -m build --sdist")
-
 
 
 # Export namespace

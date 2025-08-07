@@ -1,7 +1,7 @@
 include README.md
 include LICENSE
 include CHANGELOG.md
-recursive-include src/bitdaddy_invoke *.py
-recursive-include src/bitdaddy_invoke py.typed
+recursive-include src/invocate *.py
+recursive-include src/invocate py.typed
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]

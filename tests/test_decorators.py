@@ -1,12 +1,60 @@
-import pytest from bitdaddy_invoke import bitdaddy_task, bitdaddy_task_namespace
-def test_simple_task_decorator(): """Test basic task decoration without namespaces.""" @bitdaddy_task def test_task(c): pass
-ns = bitdaddy_task_namespace()
-assert 'test_task' in [task.name for task in ns.tasks]
-def test_namespaced_task_decorator(): """Test task decoration with namespaces.""" @bitdaddy_task(menu_parent=('build', 'frontend')) def build_js(c): pass
-ns = bitdaddy_task_namespace()
-# Check that namespace structure is created
-assert len(ns.collections) > 0
-def test_custom_task_name(): """Test custom task naming.""" @bitdaddy_task(name='custom-name') def some_function(c): pass
-ns = bitdaddy_task_namespace()
-task_names = [task.name for task in ns.tasks]
-assert 'custom-name' in task_names
+import pytest
+from invocate import task, task_namespace
+
+from src.invocate.core import TaskNamespace, InvocateTaskCollector
+
+
+# --- define tasks
+@task
+def no_decorator_args(c):
+    pass
+
+
+@task(help={'somearg': 'some argument'})
+def with_decorator_args(c, somearg):
+    pass
+
+
+@task(namespace=('ns', 'this'))
+def with_namespace_as_tuple(c):
+    pass
+
+
+@task(namespace='ns.that')
+def with_namespace_as_string(c):
+    pass
+
+
+@task(namespace='ns.the_other', name='updated-name')
+def with_namespace_as_string_and_updated_name(c):
+    pass
+
+
+ns = task_namespace()
+
+
+# --- define tests
+def test_no_decorator_args():
+    """It should register tasks with no decorator arguments."""
+    assert 'no-decorator-args' in ns.task_names
+
+
+def test_with_decorator_args():
+    """It should register tasks with decorator arguments."""
+    assert 'with-decorator-args' in ns.task_names
+
+
+def test_with_namespace_as_tuple():
+    """It should register tasks with namespace as tuple."""
+    # print(f'ns: {ns.task_names}')
+    assert 'ns.this.with-namespace-as-tuple' in ns.task_names
+
+
+def test_with_namespace_as_string():
+    """It should register tasks with namespace as string."""
+    assert 'ns.that.with-namespace-as-string' in ns.task_names
+
+
+def test_with_namespace_as_string_and_updated_name():
+    """It should register tasks with namespace as string and updated name."""
+    assert 'ns.the-other.updated-name' in ns.task_names
