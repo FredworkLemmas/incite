@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "incite"
+name = "invocate"
 version = "0.1.0"
 authors = [
     {name = "Fred McDavid", email = "fred@frameworklabs.us"},
@@ -43,9 +43,9 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/FredworkLemmas/incite.git"
-Repository = "https://github.com/FredworkLemmas/incite.git"
-"Bug Tracker" = "https://github.com/FredworkLemmas/incite.git/issues"
+Homepage = "https://github.com/FredworkLemmas/invocate.git"
+Repository = "https://github.com/FredworkLemmas/invocate.git"
+"Bug Tracker" = "https://github.com/FredworkLemmas/invocate.git/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

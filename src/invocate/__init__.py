@@ -1,5 +1,5 @@
 """
-Incite - Enhanced Invoke task management with namespacing support.
+Invocate - Enhanced Invoke task management with namespacing support.
 
 This package provides a decorator-based approach to organizing Invoke tasks
 with a simplified model of namespacing.

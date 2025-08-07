@@ -1,4 +1,4 @@
-"""Core functionality for BitDaddy Invoke task management."""
+"""Core functionality for Invocate task management."""
 
 import contextlib
 import os
@@ -10,12 +10,12 @@ from invoke import Collection
 
 _task_collector = None
 _namespace_tree = None
-NO_COLLECTION_DEFINED = 'bitdaddy_no_collection_defined'
+NO_COLLECTION_DEFINED = 'invocate_no_collection_defined'
 
 
 @attrs.define
-class BitdaddyTask:
-    """Represents a BitDaddy task with its metadata."""
+class InvocateTask:
+    """Represents an Invocate task with its metadata."""
     task: Callable
     name: str
 
@@ -40,7 +40,7 @@ class TaskNamespace:
     def add_task(
             cls,
             namespace_tuple: Union[
-                Tuple[str], Literal['bitdaddy_no_collection_defined']],
+                Tuple[str], Literal['invocate_no_collection_defined']],
             task: Callable) -> None:
         """Add a task to the tree of namespace collections."""
         if namespace_tuple == NO_COLLECTION_DEFINED:
@@ -57,7 +57,7 @@ class TaskNamespace:
         namespace.collection = None
 
     @classmethod
-    def as_collection(cls):
+    def as_collection(cls) -> Collection:
         """Return the toplevel namespace as an invoke collection with all descendants added."""
         cursor = cls._singleton_root()
         return cursor._as_collection()
@@ -105,20 +105,26 @@ class TaskNamespace:
 
 
 @attrs.define
-class BitdaddyTaskCollector:
+class InvocateTaskCollector:
     """A data structure for the collection of namespaced tasks."""
-    tasks_dict: Optional[Dict[Tuple, List[BitdaddyTask]]] = None
+    tasks_dict: Optional[Dict[Tuple, List[InvocateTask]]] = None
 
-    def add(self, menu_parent: Tuple, task: BitdaddyTask) -> None:
+    def add(self, namespace: Tuple, task: InvocateTask) -> None:
         """Store a task with its menu parent tuple."""
         if not self.tasks_dict:
             self.tasks_dict = {}
-        if menu_parent not in self.tasks_dict:
-            self.tasks_dict[menu_parent] = []
-        self.tasks_dict[menu_parent].append(task)
+        if namespace not in self.tasks_dict:
+            self.tasks_dict[namespace] = []
+        self.tasks_dict[namespace].append(task)
 
     @classmethod
-    def singleton(cls) -> 'BitdaddyTaskCollector':
+    def reset(cls):
+        global _task_collector
+        print(f'resetting task collector')
+        _task_collector = None
+
+    @classmethod
+    def singleton(cls) -> 'InvocateTaskCollector':
         """Return the global task collector instance."""
         global _task_collector
         if _task_collector:
@@ -127,7 +133,7 @@ class BitdaddyTaskCollector:
         return _task_collector
 
     @classmethod
-    def toplevel_invoke_namespace(cls):
+    def toplevel_invoke_namespace(cls) -> Collection:
         """Return the toplevel invoke task namespace collection."""
         instance = cls.singleton()
         if instance.tasks_dict:
@@ -137,13 +143,22 @@ class BitdaddyTaskCollector:
         return TaskNamespace.as_collection()
 
 
-class _BitdaddyTaskDecorator:
+class _InvocateTaskDecorator:
     """Internal decorator class for invoke tasks with namespace support."""
 
     def __init__(self, *args, **kwargs):
-        self.menu_parent = (
-            tuple(kwargs.pop('menu_parent'))
-            if 'menu_parent' in kwargs else NO_COLLECTION_DEFINED)
+        self.namespace = NO_COLLECTION_DEFINED
+        if 'namespace' in kwargs:
+            if isinstance(kwargs['namespace'], str):
+                self.namespace = tuple(kwargs['namespace'].split('.'))
+            elif (isinstance(kwargs['namespace'], tuple)
+                  or isinstance(kwargs['namespace'], list)):
+                self.namespace = kwargs['namespace']
+            else:
+                raise TypeError(
+                    f"Invalid namespace type: {type(kwargs['namespace'])}")
+            del kwargs['namespace']
+
         self.args = args
         self.kwargs = kwargs
 
@@ -154,8 +169,8 @@ class _BitdaddyTaskDecorator:
         wrapped_func = invoke.tasks.task(func, **self.kwargs)
         name = self.kwargs.get(
             'name') if 'name' in self.kwargs else func.__name__
-        task = BitdaddyTask(task=wrapped_func, name=name)
-        BitdaddyTaskCollector.singleton().add(self.menu_parent, task)
+        task = InvocateTask(task=wrapped_func, name=name)
+        InvocateTaskCollector.singleton().add(self.namespace, task)
         return wrapped_func
 
 
@@ -168,11 +183,11 @@ def task(*args, **kwargs):
         def my_task(c):
             pass
 
-        @task(menu_parent=('env','build'))
+        @task(namespace=('env','build'))
         def deploy(c):
             pass
 
-        @task(menu_parent='env.build'))
+        @task(namespace='env.build'))
         def test_deploy(c):
             pass
     """
@@ -180,16 +195,16 @@ def task(*args, **kwargs):
         func = args[0]
         wrapped_func = invoke.tasks.task(func)
         name = func.__name__
-        task = BitdaddyTask(task=wrapped_func, name=name)
-        BitdaddyTaskCollector.singleton().add(NO_COLLECTION_DEFINED, task)
+        task = InvocateTask(task=wrapped_func, name=name)
+        InvocateTaskCollector.singleton().add(NO_COLLECTION_DEFINED, task)
         return wrapped_func
     else:
-        return _BitdaddyTaskDecorator(**kwargs)
+        return _InvocateTaskDecorator(**kwargs)
 
 
 def task_namespace():
     """Return the complete task namespace collection for use with Invoke."""
-    return BitdaddyTaskCollector.toplevel_invoke_namespace()
+    return InvocateTaskCollector.toplevel_invoke_namespace()
 
 
 @contextlib.contextmanager
