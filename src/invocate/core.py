@@ -109,6 +109,9 @@ class InvocateTaskCollector:
     """A data structure for the collection of namespaced tasks."""
     tasks_dict: Optional[Dict[Tuple, List[InvocateTask]]] = None
 
+    # def __attrs_post_init__(self):
+
+
     def add(self, namespace: Tuple, task: InvocateTask) -> None:
         """Store a task with its menu parent tuple."""
         if not self.tasks_dict:
@@ -136,11 +139,14 @@ class InvocateTaskCollector:
     def toplevel_invoke_namespace(cls) -> Collection:
         """Return the toplevel invoke task namespace collection."""
         instance = cls.singleton()
+
         if instance.tasks_dict:
             for menu_tuple, tasks in instance.tasks_dict.items():
                 for task in tasks:
                     TaskNamespace.add_task(menu_tuple, task)
-        return TaskNamespace.as_collection()
+        import tasks
+        tasks.ns = TaskNamespace.as_collection()
+        return tasks.ns
 
 
 class _InvocateTaskDecorator:
