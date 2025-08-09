@@ -22,14 +22,16 @@ def get_invocate_version(c):
     return pyproject['project']['version']
 
 
-def build_twine_opts(testing=False):
+def build_twine_opts(testing=False, verbose=False):
     opts = [
         '-u __token__',
+        '--verbose' if verbose else '',
         '-p {}'.format(
             os.getenv('TEST_PYPI_TOKEN') if testing
             else os.getenv('PYPI_TOKEN'))
     ]
-    return ['--repository testpypi'] + opts if testing else opts
+    return [opt for opt in
+            (['--repository testpypi'] + opts if testing else opts) if opt]
 
 
 @task
@@ -41,22 +43,23 @@ def run_tests(c):
 @task
 def build_package(c):
     """Build the package."""
+    c.run("rm -f dist/*")
     c.run("python -m build")
 
 
-@task
-def publish_package(c):
+@task(help={'verbose': 'Verbose output. Defaults to False.'})
+def publish_package(c, verbose=False):
     """Publish the package to PyPI."""
     c.run('python -m twine upload {} dist/*'.format(
-        ' '.join(build_twine_opts(testing=False))
+        ' '.join(build_twine_opts(testing=False, verbose=verbose))
     ))
 
 
-@task
-def publish_test_package(c):
+@task(help={'verbose': 'Verbose output. Defaults to False.'})
+def publish_test_package(c, verbose=False):
     """Publish the package to TestPyPI."""
     c.run('python -m twine upload {} dist/*'.format(
-        ' '.join(build_twine_opts(testing=True))
+        ' '.join(build_twine_opts(testing=True, verbose=verbose))
     ))
 
 
@@ -99,11 +102,11 @@ def test_invocate_installation(c, testing=True):
         if os.name == 'nt':  # Windows
             python_exe = os.path.join(venv_path, 'Scripts', 'python.exe')
             pip_exe = os.path.join(venv_path, 'Scripts', 'pip.exe')
-            inv_exe = os.path.join(venv_path, 'Scripts', 'inv.exe')
+            inv_exe = os.path.join(venv_path, 'Scripts', 'invocate.exe')
         else:  # Unix/Linux/macOS
             python_exe = os.path.join(venv_path, 'bin', 'python')
             pip_exe = os.path.join(venv_path, 'bin', 'pip')
-            inv_exe = os.path.join(venv_path, 'bin', 'inv')
+            inv_exe = os.path.join(venv_path, 'bin', 'invocate')
 
         # install invoke from non-testing PyPI
         print("Installing invoke package...")
@@ -136,7 +139,7 @@ def simple_task(c):
     print("Simple task executed successfully!")
     return "simple_done"
     
-ns = task_namespace()
+#ns = task_namespace()
 '''
 
         test_tasks_file = os.path.join(temp_dir, 'tasks.py')
@@ -150,6 +153,9 @@ ns = task_namespace()
         os.chdir(temp_dir)
 
         try:
+            # List valid tasks
+            c.run(f"{inv_exe} -l", hide=False)
+
             # Test the tasks by running them with inv command
             print("\nTesting task execution:")
 

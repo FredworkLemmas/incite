@@ -1,4 +1,4 @@
-from invocate import task, task_namespace
+from invocate import task
 
 
 # Simple task
@@ -25,7 +25,3 @@ def build_wheel(c):
 def build_sdist(c):
     """Build source distribution."""
     c.run("python -m build --sdist")
-
-
-# Export namespace
-ns = task_namespace()

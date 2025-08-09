@@ -24,7 +24,7 @@ pip install invocate
 ## Quick Start
 
 ```python
-from invocate import task, task_namespace
+from invocate import task
 
 
 # Simple task (no namespace)
@@ -47,16 +47,12 @@ def build_python(c):
     """Build Python package"""
     c.run("python -m build")
 
-
-# Export the namespace for invoke
-ns = task_namespace()
-
 ```
 
 Save this as tasks.py and run:
 
 ```bash
-inv -l
+invocate -l
 ```
 
 You'll see:
