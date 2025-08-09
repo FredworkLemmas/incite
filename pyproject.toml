@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "invocate"
-version = "0.1.0"
+version = "0.2.0"
 authors = [
     {name = "Fred McDavid", email = "fred@frameworklabs.us"},
 ]
@@ -49,3 +49,6 @@ Repository = "https://github.com/FredworkLemmas/invocate.git"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[project.scripts]
+invocate = "invocate.main:program.run"

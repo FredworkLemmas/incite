@@ -1,7 +1,11 @@
-import pytest
-from invocate import task, task_namespace
+"""
+A test suite for the decorator arguments.
 
-from src.invocate.core import TaskNamespace, InvocateTaskCollector
+NOTE that this is an atypical use case in that the namespace is defined.
+This is not required in the tasks.py module.
+"""
+
+from invocate import task, task_namespace
 
 
 # --- define tasks
