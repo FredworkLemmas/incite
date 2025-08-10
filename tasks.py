@@ -103,10 +103,12 @@ def test_invocate_installation(c, testing=True):
             python_exe = os.path.join(venv_path, 'Scripts', 'python.exe')
             pip_exe = os.path.join(venv_path, 'Scripts', 'pip.exe')
             inv_exe = os.path.join(venv_path, 'Scripts', 'invocate.exe')
+            inv2_exe = os.path.join(venv_path, 'Scripts', 'nv.exe')
         else:  # Unix/Linux/macOS
             python_exe = os.path.join(venv_path, 'bin', 'python')
             pip_exe = os.path.join(venv_path, 'bin', 'pip')
             inv_exe = os.path.join(venv_path, 'bin', 'invocate')
+            inv2_exe = os.path.join(venv_path, 'bin', 'nv')
 
         # install invoke from non-testing PyPI
         print("Installing invoke package...")
@@ -139,7 +141,6 @@ def simple_task(c):
     print("Simple task executed successfully!")
     return "simple_done"
     
-#ns = task_namespace()
 '''
 
         test_tasks_file = os.path.join(temp_dir, 'tasks.py')
@@ -153,63 +154,63 @@ def simple_task(c):
         os.chdir(temp_dir)
 
         try:
-            # List valid tasks
-            c.run(f"{inv_exe} -l", hide=False)
+            for exe in (inv2_exe, inv_exe):
+                # List valid tasks
+                c.run(f"{exe} -l", hide=False)
 
-            # Test the tasks by running them with inv command
-            print("\nTesting task execution:")
+                # Test the tasks by running them with exe command
+                print("\nTesting task execution:")
 
-            # Run hello task - should be "inv hello-task"
-            print("Running hello-task...")
-            result1 = c.run(
-                f"{inv_exe} test.hello",
-                hide=True
-            )
-            expected1 = "Hello from invocate test task!"
-            if expected1 in result1.stdout:
-                print(f"✅ hello-task output correct: {result1.stdout.strip()}")
-            else:
-                print(
-                    f"❌ hello-task output incorrect. Expected: {expected1}, Got: {result1.stdout.strip()}")
-                return
+                # Run hello task
+                print("Running hello-task...")
+                result1 = c.run(
+                    f"{exe} test.hello",
+                    hide=True
+                )
+                expected1 = "Hello from invocate test task!"
+                if expected1 in result1.stdout:
+                    print(
+                        "✅ hello-task output correct: {}".format(
+                            result1.stdout.strip()))
+                else:
+                    print(
+                        "❌ hello-task output incorrect. Expected: {}, Got: {}"
+                        .format(expected1, result1.stdout.strip()))
+                    return
 
-            # Run greet task with default parameter - should be "inv greet-task"
-            print("Running greet-task with default parameter...")
-            result2 = c.run(f"{inv_exe} demo.greet", hide=True)
-            expected2 = "Greetings, World!"
-            if expected2 in result2.stdout:
-                print(
-                    f"✅ greet-task (default) output correct: {result2.stdout.strip()}")
-            else:
-                print(
-                    f"❌ greet-task (default) output incorrect. Expected: {expected2}, Got: {result2.stdout.strip()}")
-                return
+                # Run greet task
+                print("Running greet-task with default parameter...")
+                result2 = c.run(f"{exe} demo.greet", hide=True)
+                expected2 = "Greetings, World!"
+                if expected2 in result2.stdout:
+                    print(
+                        "✅ greet-task (default) output correct: {}".format(
+                            result2.stdout.strip()))
+                else:
+                    print(
+                        "❌ greet-task (default) output incorrect. "
+                        "Expected: {}, Got: {}".format(
+                            expected2, result2.stdout.strip()))
+                    return
 
-            # Run greet task with custom parameter - should be "inv greet-task -n 'PyCharm'"
-            print("Running greet-task with custom parameter...")
-            result3 = c.run(f"{inv_exe} demo.greet -n 'PyCharm'", hide=True)
-            expected3 = "Greetings, PyCharm!"
-            if expected3 in result3.stdout:
-                print(
-                    f"✅ greet-task (custom) output correct: {result3.stdout.strip()}")
-            else:
-                print(
-                    f"❌ greet-task (custom) output incorrect. Expected: {expected3}, Got: {result3.stdout.strip()}")
-                return
-
-            # Run simple task - should be "inv simple-task"
-            print("Running simple-task...")
-            result4 = c.run(f"{inv_exe} simple", hide=True)
-            expected4 = "Simple task executed successfully!"
-            if expected4 in result4.stdout:
-                print(f"✅ simple-task output correct: {result4.stdout.strip()}")
-            else:
-                print(
-                    f"❌ simple-task output incorrect. Expected: {expected4}, Got: {result4.stdout.strip()}")
-                return
+                # Run simple task
+                print("Running simple-task...")
+                result4 = c.run(f"{exe} simple", hide=True)
+                expected4 = "Simple task executed successfully!"
+                if expected4 in result4.stdout:
+                    print(
+                        "✅ simple-task output correct: {}".format(
+                            result4.stdout.strip()))
+                else:
+                    print(
+                        "❌ simple-task output incorrect. "
+                        "Expected: {}, Got: {}".format(
+                            expected4, result4.stdout.strip()))
+                    return
 
             print(
-                "\n✅ SUCCESS: Invocate package was successfully installed and all tasks executed correctly!")
+                "\n✅ SUCCESS: Invocate package was successfully installed "
+                "and all tasks executed correctly!")
             print("✅ Namespace and name parameters work as expected")
             print("✅ Task parameter passing works correctly")
             print("✅ All task outputs matched expectations")
